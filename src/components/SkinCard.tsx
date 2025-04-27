@@ -34,33 +34,26 @@ export const SkinCard: React.FC<SkinCardProps> = ({ skin, className }) => {
   };
 
   return (
-    <Card className={cn("w-full transition-all hover:shadow-md", className)}>
-      <CardHeader className="pb-2">
+    <Card className={cn("transition-all hover:shadow-md", className)}>
+      <CardHeader className="flex flex-row items-center justify-between pb-2">
         <CardTitle className="text-lg font-medium">{skin.name}</CardTitle>
+        <div className="text-xl font-semibold text-primary">{formattedPrice}</div>
       </CardHeader>
-      <CardContent className="pb-2">
-        <div className="bg-secondary rounded-md p-3 mb-3">
+      <CardContent className="grid md:grid-cols-2 gap-4">
+        <div className="bg-secondary rounded-md p-3">
           <div className="text-sm text-muted-foreground mb-1">Sticker</div>
           <div className="font-medium">{skin.sticker}</div>
         </div>
-        <div className="grid gap-4">
-          <div className="flex justify-between items-center">
-            <div>
-              <div className="text-sm text-muted-foreground">Price</div>
-              <div className="text-xl font-semibold text-primary">{formattedPrice}</div>
-            </div>
+        <div className="grid grid-cols-2 gap-2 text-sm">
+          <div className="flex items-center gap-1">
+            <Calendar className="text-muted-foreground" size={16} />
+            <span className="text-muted-foreground">First seen:</span>
+            <span>{formatTime(skin.timestamp)}</span>
           </div>
-          <div className="grid grid-cols-2 gap-2 text-sm">
-            <div className="flex items-center gap-1">
-              <Calendar className="text-muted-foreground" />
-              <span className="text-muted-foreground">First seen:</span>
-              <span>{formatTime(skin.timestamp)}</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Clock className="text-muted-foreground" />
-              <span className="text-muted-foreground">Updated:</span>
-              <span>{formatTime(skin.lastUpdated)}</span>
-            </div>
+          <div className="flex items-center gap-1">
+            <Clock className="text-muted-foreground" size={16} />
+            <span className="text-muted-foreground">Updated:</span>
+            <span>{formatTime(skin.lastUpdated)}</span>
           </div>
         </div>
       </CardContent>

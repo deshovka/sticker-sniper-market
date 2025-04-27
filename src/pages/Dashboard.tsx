@@ -8,12 +8,15 @@ import { Input } from '@/components/ui/input';
 import { toast } from '@/components/ui/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowUp, ArrowDown } from 'lucide-react';
-import { SkinStats } from '@/components/SkinStats';
+import { StickersFilter } from '@/components/StickersFilter';
+import { PriceRangeFilter } from '@/components/PriceRangeFilter';
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const [webSocketUrl, setWebSocketUrl] = useState('');
-  const [filterSticker, setFilterSticker] = useState('');
+  const [selectedSticker, setSelectedSticker] = useState('');
+  const [minPrice, setMinPrice] = useState('');
+  const [maxPrice, setMaxPrice] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [sortConfig, setSortConfig] = useState<{
     key: 'price' | 'name';
@@ -65,14 +68,21 @@ const Dashboard: React.FC = () => {
     }));
   };
 
-  const filteredListings = filterSticker
-    ? listings.filter(skin => 
-        skin.sticker.toLowerCase().includes(filterSticker.toLowerCase()))
-    : listings;
+  const filteredListings = React.useMemo(() => {
+    let result = listings;
 
-  const sortedListings = React.useMemo(() => {
-    let result = [...filteredListings];
-    
+    if (selectedSticker) {
+      result = result.filter(skin => skin.sticker === selectedSticker);
+    }
+
+    if (minPrice !== '') {
+      result = result.filter(skin => skin.price >= parseFloat(minPrice));
+    }
+
+    if (maxPrice !== '') {
+      result = result.filter(skin => skin.price <= parseFloat(maxPrice));
+    }
+
     if (sortConfig) {
       result.sort((a, b) => {
         if (sortConfig.key === 'price') {
@@ -86,9 +96,9 @@ const Dashboard: React.FC = () => {
     } else {
       result.sort((a, b) => b.timestamp - a.timestamp);
     }
-    
+
     return result;
-  }, [filteredListings, sortConfig]);
+  }, [listings, selectedSticker, minPrice, maxPrice, sortConfig]);
 
   if (!isAuthenticated) {
     return null;
@@ -133,48 +143,55 @@ const Dashboard: React.FC = () => {
         </Card>
 
         <div className="mb-6">
-          <SkinStats listings={sortedListings} />
+          <Card>
+            <CardHeader>
+              <CardTitle>Filters</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <StickersFilter
+                listings={listings}
+                selectedSticker={selectedSticker}
+                onStickerChange={setSelectedSticker}
+              />
+              <PriceRangeFilter
+                minPrice={minPrice}
+                maxPrice={maxPrice}
+                onMinPriceChange={setMinPrice}
+                onMaxPriceChange={setMaxPrice}
+              />
+            </CardContent>
+          </Card>
         </div>
 
         <div className="mb-6">
-          <div className="flex flex-col md:flex-row justify-between mb-4">
-            <div className="flex items-center gap-4">
-              <h2 className="text-xl font-semibold">Skin Listings</h2>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleSort('name')}
-                  className="flex items-center gap-1"
-                >
-                  Name
-                  {sortConfig?.key === 'name' && (
-                    sortConfig.direction === 'asc' ? <ArrowUp size={16} /> : <ArrowDown size={16} />
-                  )}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleSort('price')}
-                  className="flex items-center gap-1"
-                >
-                  Price
-                  {sortConfig?.key === 'price' && (
-                    sortConfig.direction === 'asc' ? <ArrowUp size={16} /> : <ArrowDown size={16} />
-                  )}
-                </Button>
-              </div>
-            </div>
-            <div className="w-full md:w-80 mt-4 md:mt-0">
-              <Input
-                placeholder="Filter by sticker name..."
-                value={filterSticker}
-                onChange={(e) => setFilterSticker(e.target.value)}
-              />
+          <div className="flex justify-end mb-4">
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleSort('name')}
+                className="flex items-center gap-1"
+              >
+                Name
+                {sortConfig?.key === 'name' && (
+                  sortConfig.direction === 'asc' ? <ArrowUp size={16} /> : <ArrowDown size={16} />
+                )}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleSort('price')}
+                className="flex items-center gap-1"
+              >
+                Price
+                {sortConfig?.key === 'price' && (
+                  sortConfig.direction === 'asc' ? <ArrowUp size={16} /> : <ArrowDown size={16} />
+                )}
+              </Button>
             </div>
           </div>
 
-          {sortedListings.length === 0 ? (
+          {filteredListings.length === 0 ? (
             <div className="bg-secondary p-8 rounded-lg text-center">
               <p className="text-lg text-muted-foreground">
                 {isConnected 
@@ -183,9 +200,9 @@ const Dashboard: React.FC = () => {
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {sortedListings.map((skin) => (
-                <SkinCard key={`${skin.name}-${skin.timestamp}`} skin={skin} />
+            <div className="space-y-4">
+              {filteredListings.map((skin) => (
+                <SkinCard key={`${skin.name}-${skin.timestamp}`} skin={skin} className="w-full" />
               ))}
             </div>
           )}
