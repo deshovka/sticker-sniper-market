@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useWebSocket } from '@/hooks/useWebSocket';
@@ -8,13 +7,18 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/components/ui/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ArrowUp, ArrowDown } from 'lucide-react';
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const [webSocketUrl, setWebSocketUrl] = useState('');
   const [filterSticker, setFilterSticker] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  
+  const [sortConfig, setSortConfig] = useState<{
+    key: 'price' | 'name';
+    direction: 'asc' | 'desc';
+  } | null>(null);
+
   const {
     connect,
     disconnect,
@@ -23,7 +27,6 @@ const Dashboard: React.FC = () => {
     listings
   } = useWebSocket();
 
-  // Check authentication
   useEffect(() => {
     const auth = localStorage.getItem('isAuthenticated');
     if (auth !== 'true') {
@@ -54,17 +57,40 @@ const Dashboard: React.FC = () => {
     navigate('/login');
   };
 
-  // Filter listings by sticker name if filter is applied
+  const handleSort = (key: 'price' | 'name') => {
+    setSortConfig(current => ({
+      key,
+      direction: current?.key === key && current.direction === 'asc' ? 'desc' : 'asc'
+    }));
+  };
+
   const filteredListings = filterSticker
     ? listings.filter(skin => 
         skin.sticker.toLowerCase().includes(filterSticker.toLowerCase()))
     : listings;
 
-  // Sort listings by timestamp, newest first
-  const sortedListings = [...filteredListings].sort((a, b) => b.timestamp - a.timestamp);
+  const sortedListings = React.useMemo(() => {
+    let result = [...filteredListings];
+    
+    if (sortConfig) {
+      result.sort((a, b) => {
+        if (sortConfig.key === 'price') {
+          const comparison = a.price - b.price;
+          return sortConfig.direction === 'asc' ? comparison : -comparison;
+        } else {
+          const comparison = a.name.localeCompare(b.name);
+          return sortConfig.direction === 'asc' ? comparison : -comparison;
+        }
+      });
+    } else {
+      result.sort((a, b) => b.timestamp - a.timestamp);
+    }
+    
+    return result;
+  }, [filteredListings, sortConfig]);
 
   if (!isAuthenticated) {
-    return null; // Don't render anything while checking auth
+    return null;
   }
 
   return (
@@ -107,8 +133,34 @@ const Dashboard: React.FC = () => {
 
         <div className="mb-6">
           <div className="flex flex-col md:flex-row justify-between mb-4">
-            <h2 className="text-xl font-semibold mb-2 md:mb-0">Skin Listings</h2>
-            <div className="w-full md:w-80">
+            <div className="flex items-center gap-4">
+              <h2 className="text-xl font-semibold">Skin Listings</h2>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleSort('name')}
+                  className="flex items-center gap-1"
+                >
+                  Name
+                  {sortConfig?.key === 'name' && (
+                    sortConfig.direction === 'asc' ? <ArrowUp size={16} /> : <ArrowDown size={16} />
+                  )}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleSort('price')}
+                  className="flex items-center gap-1"
+                >
+                  Price
+                  {sortConfig?.key === 'price' && (
+                    sortConfig.direction === 'asc' ? <ArrowUp size={16} /> : <ArrowDown size={16} />
+                  )}
+                </Button>
+              </div>
+            </div>
+            <div className="w-full md:w-80 mt-4 md:mt-0">
               <Input
                 placeholder="Filter by sticker name..."
                 value={filterSticker}

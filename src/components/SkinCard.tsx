@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -32,6 +31,10 @@ export const SkinCard: React.FC<SkinCardProps> = ({ skin, className }) => {
     window.open(skin.marketLink, '_blank');
   };
 
+  const handleViewOnSteam = () => {
+    window.open(skin.marketLink, '_blank', 'noopener,noreferrer');
+  };
+
   return (
     <Card className={cn("w-full transition-all", className)}>
       <CardHeader className="pb-2">
@@ -53,13 +56,20 @@ export const SkinCard: React.FC<SkinCardProps> = ({ skin, className }) => {
           </div>
         </div>
       </CardContent>
-      <CardFooter>
+      <CardFooter className="flex gap-2">
         <Button 
           variant="outline" 
           className="w-full"
           onClick={handleOpenMarketLink}
         >
           View on Market
+        </Button>
+        <Button 
+          variant="default"
+          className="w-full"
+          onClick={handleViewOnSteam}
+        >
+          Open on Steam
         </Button>
       </CardFooter>
     </Card>
