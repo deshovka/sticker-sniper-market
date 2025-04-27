@@ -6,6 +6,7 @@ export interface SkinListing {
   price: number;
   marketLink: string;
   timestamp: number;
+  lastUpdated: number;
   imageUrl?: string;
 }
 

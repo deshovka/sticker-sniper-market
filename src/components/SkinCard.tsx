@@ -1,8 +1,10 @@
+
 import React from 'react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { SkinListing } from '@/utils/types';
 import { cn } from '@/lib/utils';
+import { Calendar, Clock } from 'lucide-react';
 
 interface SkinCardProps {
   skin: SkinListing;
@@ -15,8 +17,8 @@ export const SkinCard: React.FC<SkinCardProps> = ({ skin, className }) => {
     currency: 'USD'
   }).format(skin.price);
 
-  const timeSince = (): string => {
-    const seconds = Math.floor((Date.now() - skin.timestamp) / 1000);
+  const formatTime = (timestamp: number): string => {
+    const seconds = Math.floor((Date.now() - timestamp) / 1000);
     
     if (seconds < 60) return `${seconds}s ago`;
     const minutes = Math.floor(seconds / 60);
@@ -27,16 +29,12 @@ export const SkinCard: React.FC<SkinCardProps> = ({ skin, className }) => {
     return `${days}d ago`;
   };
 
-  const handleOpenMarketLink = () => {
-    window.open(skin.marketLink, '_blank');
-  };
-
   const handleViewOnSteam = () => {
     window.open(skin.marketLink, '_blank', 'noopener,noreferrer');
   };
 
   return (
-    <Card className={cn("w-full transition-all", className)}>
+    <Card className={cn("w-full transition-all hover:shadow-md", className)}>
       <CardHeader className="pb-2">
         <CardTitle className="text-lg font-medium">{skin.name}</CardTitle>
       </CardHeader>
@@ -45,31 +43,34 @@ export const SkinCard: React.FC<SkinCardProps> = ({ skin, className }) => {
           <div className="text-sm text-muted-foreground mb-1">Sticker</div>
           <div className="font-medium">{skin.sticker}</div>
         </div>
-        <div className="flex justify-between items-center">
-          <div>
-            <div className="text-sm text-muted-foreground">Price</div>
-            <div className="text-xl font-semibold text-primary">{formattedPrice}</div>
+        <div className="grid gap-4">
+          <div className="flex justify-between items-center">
+            <div>
+              <div className="text-sm text-muted-foreground">Price</div>
+              <div className="text-xl font-semibold text-primary">{formattedPrice}</div>
+            </div>
           </div>
-          <div className="text-right">
-            <div className="text-sm text-muted-foreground">Updated</div>
-            <div className="text-sm">{timeSince()}</div>
+          <div className="grid grid-cols-2 gap-2 text-sm">
+            <div className="flex items-center gap-1">
+              <Calendar className="text-muted-foreground" />
+              <span className="text-muted-foreground">First seen:</span>
+              <span>{formatTime(skin.timestamp)}</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Clock className="text-muted-foreground" />
+              <span className="text-muted-foreground">Updated:</span>
+              <span>{formatTime(skin.lastUpdated)}</span>
+            </div>
           </div>
         </div>
       </CardContent>
-      <CardFooter className="flex gap-2">
-        <Button 
-          variant="outline" 
-          className="w-full"
-          onClick={handleOpenMarketLink}
-        >
-          View on Market
-        </Button>
+      <CardFooter>
         <Button 
           variant="default"
           className="w-full"
           onClick={handleViewOnSteam}
         >
-          Open on Steam
+          View on Steam
         </Button>
       </CardFooter>
     </Card>

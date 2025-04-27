@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { SkinListing, ServerStatus, WebSocketMessage } from '../utils/types';
 import { toast } from '@/components/ui/use-toast';
@@ -181,6 +180,22 @@ export function useWebSocket({
 
     return () => clearInterval(checkInterval);
   }, [isConnected, serverStatus]);
+
+  // Add sample data
+  useEffect(() => {
+    if (!listings.length) {
+      const sampleListing: SkinListing = {
+        id: "sample-1",
+        name: "PP-Bizon | Water Sigil (Factory New)",
+        sticker: "compLexity Gaming | Katowice 2014",
+        price: 207.20,
+        marketLink: "https://steamcommunity.com/market/listings/730/PP-Bizon%20%7C%20Water%20Sigil%20%28Factory%20New%29?filter=%22compLexity%20Gaming%20Katowice%202014%22",
+        timestamp: Date.now(),
+        lastUpdated: Date.now()
+      };
+      setListings([sampleListing]);
+    }
+  }, [listings.length]);
 
   return {
     connect,

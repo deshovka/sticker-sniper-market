@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { toast } from '@/components/ui/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowUp, ArrowDown } from 'lucide-react';
+import { SkinStats } from '@/components/SkinStats';
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -130,6 +131,10 @@ const Dashboard: React.FC = () => {
             </div>
           </CardContent>
         </Card>
+
+        <div className="mb-6">
+          <SkinStats listings={sortedListings} />
+        </div>
 
         <div className="mb-6">
           <div className="flex flex-col md:flex-row justify-between mb-4">
